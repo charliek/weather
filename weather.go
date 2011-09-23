@@ -14,13 +14,13 @@ const (
 )
 
 type Result struct {
-	XMLName xml.Name "forecast"
+	XMLName     xml.Name      "forecast"
 	Forecastday []Forecastday "txt_forecast>forecastday"
 }
 
 type Forecastday struct {
 	Fcttext string
-	Title string
+	Title   string
 }
 
 func printResp(resp *http.Response) {
@@ -48,11 +48,10 @@ func main() {
 	for i := 0; i < len(result.Forecastday); i++ {
 		var day = result.Forecastday[i]
 		fmt.Printf("%s:\n*******************\n%s\n\n", day.Title, day.Fcttext)
-	}	
+	}
 }
 
-func fatal(s string, a ... interface{}) { 
-        fmt.Fprintf(os.Stderr, "netfwd: %s\n", fmt.Sprintf(s, a)) 
-        os.Exit(2) 
+func fatal(s string, a ...interface{}) {
+	fmt.Fprintf(os.Stderr, "netfwd: %s\n", fmt.Sprintf(s, a))
+	os.Exit(2)
 }
- 
