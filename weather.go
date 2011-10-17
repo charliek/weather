@@ -14,8 +14,8 @@ const (
 )
 
 type Result struct {
-	XMLName     xml.Name      "forecast"
-	Forecastday []Forecastday "txt_forecast>forecastday"
+	XMLName     xml.Name      `xml:"forecast"`
+	Forecastday []Forecastday `xml:"txt_forecast>forecastday"`
 }
 
 type Forecastday struct {
