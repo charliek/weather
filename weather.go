@@ -15,19 +15,19 @@ const (
 )
 
 type Result struct {
-	XMLName     xml.Name      `xml:"response"`
-	TextCast []TextForecast `xml:"forecast>txt_forecast>forecastdays>forecastday"`
+	XMLName    xml.Name         `xml:"response"`
+	TextCast   []TextForecast   `xml:"forecast>txt_forecast>forecastdays>forecastday"`
 	SimpleCast []SimpleForecast `xml:"forecast>simpleforecast>forecastdays>forecastday"`
-	Location string `xml:"current_observation>display_location>full"`
+	Location   string           `xml:"current_observation>display_location>full"`
 }
 
 type SimpleForecast struct {
-	High int32 `xml:"high>fahrenheit"`
-	Low int32 `xml:"low>fahrenheit"`
-	Year int32 `xml:"date>year"`
-	Day int32 `xml:"date>day"`
-	Month int32 `xml:"date>month"`
-	Weekday string `xml:"date>weekday"`
+	High       int32  `xml:"high>fahrenheit"`
+	Low        int32  `xml:"low>fahrenheit"`
+	Year       int32  `xml:"date>year"`
+	Day        int32  `xml:"date>day"`
+	Month      int32  `xml:"date>month"`
+	Weekday    string `xml:"date>weekday"`
 	Conditions string
 }
 
@@ -56,30 +56,29 @@ func main() {
 	location := flag.String("l", "autoip", "Weather location to query. Zip code or city,state.")
 	flag.Parse()
 	url := fmt.Sprintf(WeatherUrl, *location)
-	
+
 	resp, err := http.Get(url)
 	if err != nil {
 		fatal("Error pulling down weather data.", err)
 	}
 	result := ParseWeatherResponse(resp.Body)
-	fmt.Print("++++++++++++++++++++++++++++++++++++++\n")	
+	fmt.Print("++++++++++++++++++++++++++++++++++++++\n")
 	fmt.Printf("Weather for %s\n", result.Location)
 	fmt.Print("++++++++++++++++++++++++++++++++++++++\n")
 	// printTextForecast(result)
 	printSimpleForcast(result)
 
-	
 }
 
 func printTextForecast(result Result) {
 	for i := 0; i < len(result.TextCast); i++ {
 		var day = result.TextCast[i]
 		fmt.Printf("%s:\n*******************\n%s\n\n", day.Title, day.Fcttext)
-	}	
+	}
 }
 
 func printSimpleForcast(result Result) {
-	fmt.Print("             L   /  H\n") 
+	fmt.Print("             L   /  H\n")
 	for i := 0; i < len(result.SimpleCast); i++ {
 		var s = result.SimpleCast[i]
 		if i == 0 {
@@ -89,7 +88,7 @@ func printSimpleForcast(result Result) {
 		} else {
 			fmt.Printf("%9s", s.Weekday)
 			// fmt.Printf("%d-%02d-%02d", s.Year, s.Month, s.Day)
-			
+
 		}
 		fmt.Printf(" - %3d  / %3d - %s\n", s.Low, s.High, s.Conditions)
 	}
