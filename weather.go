@@ -7,15 +7,16 @@ import (
 	"os"
 	"xml"
 	"io"
+	"flag"
 )
 
 const (
-	WeatherUrl = "http://api.wunderground.com/auto/wui/geo/ForecastXML/index.xml?query=55116"
+	WeatherUrl = "http://api.wunderground.com/api/573832cedbb28381/conditions/forecast/q/%s.xml"
 )
 
 type Result struct {
-	XMLName     xml.Name      `xml:"forecast"`
-	Forecastday []Forecastday `xml:"txt_forecast>forecastday"`
+	XMLName     xml.Name      `xml:"response"`
+	Forecastday []Forecastday `xml:"forecast>txt_forecast>forecastdays>forecastday"`
 }
 
 type Forecastday struct {
@@ -40,7 +41,11 @@ func ParseWeatherResponse(r io.Reader) Result {
 }
 
 func main() {
-	resp, err := http.Get(WeatherUrl)
+	location := flag.String("l", "autoip", "Weather location to query. Zip code or city,state.")
+	flag.Parse()
+	url := fmt.Sprintf(WeatherUrl, *location)
+	
+	resp, err := http.Get(url)
 	if err != nil {
 		fatal("Error pulling down weather data.", err)
 	}
