@@ -16,10 +16,22 @@ const (
 
 type Result struct {
 	XMLName     xml.Name      `xml:"response"`
-	Forecastday []Forecastday `xml:"forecast>txt_forecast>forecastdays>forecastday"`
+	TextCast []TextForecast `xml:"forecast>txt_forecast>forecastdays>forecastday"`
+	SimpleCast []SimpleForecast `xml:"forecast>simpleforecast>forecastdays>forecastday"`
+	Location string `xml:"current_observation>display_location>full"`
 }
 
-type Forecastday struct {
+type SimpleForecast struct {
+	High int32 `xml:"high>fahrenheit"`
+	Low int32 `xml:"low>fahrenheit"`
+	Year int32 `xml:"date>year"`
+	Day int32 `xml:"date>day"`
+	Month int32 `xml:"date>month"`
+	Weekday string `xml:"date>weekday"`
+	Conditions string
+}
+
+type TextForecast struct {
 	Fcttext string
 	Title   string
 }
@@ -50,9 +62,36 @@ func main() {
 		fatal("Error pulling down weather data.", err)
 	}
 	result := ParseWeatherResponse(resp.Body)
-	for i := 0; i < len(result.Forecastday); i++ {
-		var day = result.Forecastday[i]
+	fmt.Print("++++++++++++++++++++++++++++++++++++++\n")	
+	fmt.Printf("Weather for %s\n", result.Location)
+	fmt.Print("++++++++++++++++++++++++++++++++++++++\n")
+	// printTextForecast(result)
+	printSimpleForcast(result)
+
+	
+}
+
+func printTextForecast(result Result) {
+	for i := 0; i < len(result.TextCast); i++ {
+		var day = result.TextCast[i]
 		fmt.Printf("%s:\n*******************\n%s\n\n", day.Title, day.Fcttext)
+	}	
+}
+
+func printSimpleForcast(result Result) {
+	fmt.Print("             L   /  H\n") 
+	for i := 0; i < len(result.SimpleCast); i++ {
+		var s = result.SimpleCast[i]
+		if i == 0 {
+			fmt.Printf("%9s", "Today")
+		} else if i == 1 {
+			fmt.Printf("%9s", "Tomorrow")
+		} else {
+			fmt.Printf("%9s", s.Weekday)
+			// fmt.Printf("%d-%02d-%02d", s.Year, s.Month, s.Day)
+			
+		}
+		fmt.Printf(" - %3d  / %3d - %s\n", s.Low, s.High, s.Conditions)
 	}
 }
 
