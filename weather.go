@@ -19,6 +19,8 @@ type Result struct {
 	TextCast   []TextForecast   `xml:"forecast>txt_forecast>forecastdays>forecastday"`
 	SimpleCast []SimpleForecast `xml:"forecast>simpleforecast>forecastdays>forecastday"`
 	Location   string           `xml:"current_observation>display_location>full"`
+	Temp       string           `xml:"current_observation>temp_f"`
+	Weather    string           `xml:"current_observation>weather"`
 }
 
 type SimpleForecast struct {
@@ -67,13 +69,20 @@ func main() {
 	fmt.Print("++++++++++++++++++++++++++++++++++++++\n")
 	// printTextForecast(result)
 	printSimpleForcast(result)
-
+	fmt.Print("\n")
+	printCurrentForcast(result)
 }
 
 func printTextForecast(result Result) {
 	for i := 0; i < len(result.TextCast); i++ {
 		var day = result.TextCast[i]
 		fmt.Printf("%s:\n*******************\n%s\n\n", day.Title, day.Fcttext)
+	}
+}
+
+func printCurrentForcast(result Result) {
+	if len(result.Temp) > 0 && len(result.Weather) > 0 {
+		fmt.Printf("Currently : %s - %s\n\n", result.Temp, result.Weather)
 	}
 }
 
@@ -88,7 +97,6 @@ func printSimpleForcast(result Result) {
 		} else {
 			fmt.Printf("%9s", s.Weekday)
 			// fmt.Printf("%d-%02d-%02d", s.Year, s.Month, s.Day)
-
 		}
 		fmt.Printf(" - %3d  / %3d - %s\n", s.Low, s.High, s.Conditions)
 	}
