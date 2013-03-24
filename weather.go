@@ -1,13 +1,13 @@
 package main
 
 import (
-	"fmt"
-	"http"
-	"io/ioutil"
-	"os"
-	"xml"
-	"io"
+	"encoding/xml"
 	"flag"
+	"fmt"
+	"io"
+	"io/ioutil"
+	"net/http"
+	"os"
 )
 
 const (
@@ -30,12 +30,12 @@ type SimpleForecast struct {
 	Day        int32  `xml:"date>day"`
 	Month      int32  `xml:"date>month"`
 	Weekday    string `xml:"date>weekday"`
-	Conditions string
+	Conditions string `xml:"conditions"`
 }
 
 type TextForecast struct {
-	Fcttext string
-	Title   string
+	Fcttext string `xml:"fcttext"`
+	Title   string `xml:"title"`
 }
 
 func printResp(resp *http.Response) {
@@ -48,10 +48,17 @@ func printResp(resp *http.Response) {
 	fmt.Printf(string(s))
 }
 
-func ParseWeatherResponse(r io.Reader) Result {
+func ParseWeatherResponse(r io.Reader) (*Result, error) {
+	bytes, err := ioutil.ReadAll(r)
+	if err != nil {
+		return nil, err
+	}
 	var result Result
-	xml.Unmarshal(r, &result)
-	return result
+	err = xml.Unmarshal(bytes, &result)
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
 }
 
 func main() {
@@ -63,14 +70,17 @@ func main() {
 	if err != nil {
 		fatal("Error pulling down weather data.", err)
 	}
-	result := ParseWeatherResponse(resp.Body)
+	result, err := ParseWeatherResponse(resp.Body)
+	if err != nil {
+		fatal("Error reading weather data.", err)
+	}
 	fmt.Print("++++++++++++++++++++++++++++++++++++++\n")
 	fmt.Printf("Weather for %s\n", result.Location)
 	fmt.Print("++++++++++++++++++++++++++++++++++++++\n")
-	// printTextForecast(result)
-	printSimpleForcast(result)
+	// printTextForecast(*result)
+	printSimpleForcast(*result)
 	fmt.Print("\n")
-	printCurrentForcast(result)
+	printCurrentForcast(*result)
 }
 
 func printTextForecast(result Result) {
